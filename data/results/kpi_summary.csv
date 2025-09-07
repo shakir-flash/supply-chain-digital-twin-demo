@@ -1,0 +1,6 @@
+metric,value
+total_transport_cost_usd,25284258.77
+total_units,387484.0
+num_dcs,14
+num_stores,120
+lp_status,optimal
