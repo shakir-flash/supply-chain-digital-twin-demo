@@ -1,5 +1,5 @@
 # visualization.py
-# Produces PNG charts you can drag into PPT. Keep it simple and readable.
+# Generates headline-style charts for slides.
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -23,8 +23,18 @@ def run():
     cost_by_region = pd.read_csv(RESULTS_DIR / "cost_by_region.csv")
     stores = pd.read_csv(CLEAN_DIR / "stores_clean.csv")
 
-    _bar(util["dc_id"], util["utilization_pct"], "DC Utilization (%)", "DC", "Utilization %", "dc_utilization.png")
-    _bar(cost_by_dc["dc_id"], cost_by_dc["flow_cost_usd"], "Total Transport Cost by DC", "DC", "Cost (USD)", "cost_per_dc.png")
+    _bar(util["dc_id"], util["utilization_pct"],
+         "Utilization: some DCs near full — risk if demand surges",
+         "DC", "Utilization %", "dc_utilization.png")
+
+    _bar(cost_by_dc["dc_id"], cost_by_dc["flow_cost_usd"],
+         "Transport cost concentrated in a few DCs",
+         "DC", "Cost (USD)", "cost_per_dc.png")
+
+    _bar(cost_by_region["region"], cost_by_region["flow_cost_usd"],
+         "Cost burden by region — optimization reveals hotspots",
+         "Region", "Cost (USD)", "cost_by_region.png")
+
     plt.figure()
     plt.hist(stores["weekly_demand"], bins=20)
     plt.title("Distribution of Store Weekly Demand")

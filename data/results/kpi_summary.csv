@@ -1,5 +1,7 @@
 metric,value
-total_transport_cost_usd,25284258.77
+total_transport_cost_usd,530376.27
+unmet_penalty_usd,2953030.0
+total_cost_with_penalty_usd,3483406.27
 total_units,387484.0
 num_dcs,14
 num_stores,120
