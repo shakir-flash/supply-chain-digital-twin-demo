@@ -1,4 +1,4 @@
-# Supply Chain Digital Twin — Interview Demo (Home Depot)
+# Supply Chain Digital Twin - Interview Demo (Home Depot)
 
 A streamlined **supply chain digital twin** built for scenario planning, cost tradeoffs, and service risk insights.  
 This demo integrates **data pipeline, optimization, SQL-backed insights, and an interactive Streamlit dashboard** with a clean, branded header tailored for The Home Depot interview presentation.
