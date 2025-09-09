@@ -1,5 +1,4 @@
-# app/backend/main.py
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any
 import pandas as pd
@@ -13,6 +12,7 @@ from analytics.answer_engine_sql import handle as sql_handle
 
 app = FastAPI(title="Supply Chain Digital Twin")
 
+# ---------------- Models ----------------
 class Scenario(BaseModel):
     dc_capacity_mult: Dict[str, float] = {}
     region_demand_mult: Dict[str, float] = {}
@@ -20,12 +20,22 @@ class Scenario(BaseModel):
 class Query(BaseModel):
     question: str
 
+class SqlRun(BaseModel):
+    query: str
+    max_rows: int | None = 5000
+
+# ---------------- App startup ----------------
+@app.on_event("startup")
+def _startup_refresh():
+    try:
+        refresh_from_csvs()
+    except Exception:
+        pass
 
 # ---------------- Health ----------------
 @app.get("/health")
 def health():
     return {"ok": True}
-
 
 # ---------------- Pipeline ----------------
 @app.post("/run/full")
@@ -44,10 +54,8 @@ def api_scenario_run(s: Scenario):
     refresh_from_csvs()
     return load_kpis()
 
-
 # ---------------- Dashboard (SQL-backed) ----------------
 def safe_query(q: str, params: dict = None):
-    """Helper to wrap dashboard SQL queries safely."""
     try:
         df = pd.read_sql(text(q), get_engine(), params=params or {})
         return df.to_dict(orient="records")
@@ -95,8 +103,6 @@ def demand_dist():
     """
     return safe_query(q)
 
-
-
 # ---------------- NLQ (Deterministic SQL) ----------------
 @app.post("/nlq")
 def api_nlq(q: Query):
@@ -110,3 +116,44 @@ def api_nlq(q: Query):
     ans["mode"] = "deterministic_sql"
     ans["intent"] = intent
     return ans
+
+# ---------------- Secure SQL Explorer ----------------
+
+DENYLIST = ("insert", "update", "delete", "drop", "alter", "create", "truncate", "attach", "pragma")
+
+def _is_select_only(q: str) -> bool:
+    ql = " ".join(q.strip().lower().split())
+    if any(tok in ql for tok in DENYLIST):
+        return False
+    return ql.startswith("select") or ql.startswith("with")
+
+def _sanitize_single_statement(q: str) -> str:
+    """
+    - Strip trailing semicolons/whitespace
+    - Fail if there are internal semicolons (multi statements)
+    """
+    q_clean = q.strip().rstrip(";").strip()
+    # if any remaining ';' inside, reject (multi-statement)
+    if ";" in q_clean:
+        raise HTTPException(status_code=400, detail="Only a single statement is allowed. Remove extra ';'.")
+    return q_clean
+
+@app.post("/sql/run")
+def sql_run(body: SqlRun):
+    if not _is_select_only(body.query):
+        raise HTTPException(status_code=400, detail="Only read-only SELECT/CTE queries are allowed.")
+    q_clean = _sanitize_single_statement(body.query)
+
+    q_to_run = q_clean
+    if body.max_rows and "limit" not in q_clean.lower():
+        q_to_run = f"SELECT * FROM ({q_clean}) AS t LIMIT {int(body.max_rows)}"
+
+    try:
+        df = pd.read_sql(text(q_to_run), get_engine())
+        return {
+            "columns": list(df.columns),
+            "records": df.to_dict(orient="records"),
+            "rowcount": len(df)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
