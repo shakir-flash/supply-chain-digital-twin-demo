@@ -6,6 +6,7 @@ import streamlit as st
 from pathlib import Path
 from st_aggrid import AgGrid, GridOptionsBuilder
 from components.hd_header import render_header
+from components.suggested_questions import render_suggested_questions
 
 render_header(
     logo_path="assets/hd_favicon.png",  # update if your path is different
@@ -35,7 +36,7 @@ HD_DARK = "#0f1116"
 HD_CARD_BG = "#161a23"
 
 st.set_page_config(
-    page_title="Supply Chain Digital Twin — Network Refresh",
+    page_title="Supply Chain Digital Twin, Network Refresh",
     page_icon=str(ASSETS_DIR / "hd_favicon.png") if (ASSETS_DIR / "hd_favicon.png").exists() else "🧭",
     layout="wide",
 )
@@ -108,7 +109,7 @@ st.markdown(
     <div style="display:flex; align-items:center; gap:16px;">
       <div style="width:14px;height:28px;background:{HD_ORANGE};border-radius:3px;"></div>
       <div>
-        <div class="hd-title">Supply Chain Digital Twin <span class="hd-accent">— Network Refresh</span></div>
+        <div class="hd-title">Supply Chain Digital Twin, <span class="hd-accent"> Network Refresh</span></div>
         <div class="hd-sub">Executive dashboard, scenario planning, SQL-backed insights.</div>
       </div>
     </div>
@@ -398,13 +399,44 @@ with tab_map:
 # -------- Ask the Network --------
 with tab_nlq:
     st.subheader("Ask the Network")
+
+    # Suggested questions (simple static box)
+    st.markdown(
+    """
+    <div style="
+        background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 14px 18px;
+        margin-bottom: 14px;
+        color: #f5f5f5;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.35);">
+        <span style="font-weight:600; font-size:1rem; color:#FFA559;"> Suggested questions you can ask:</span>
+        <ul style="margin-top:8px; line-height:1.6;">
+            <li>What is the total cost?</li>
+            <li>What is the transport cost?</li>
+            <li>How many unmet units?</li>
+            <li>Show unmet units by region</li>
+            <li>Top DCs by utilization</li>
+            <li>Bottom DCs by utilization</li>
+            <li>Which lanes are the slowest?</li>
+        </ul>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+    # Input box
     q = st.text_input("Question", "Which DC has the highest utilization?")
+
     if st.button("Ask"):
         resp = safe_get(f"{BACKEND}/nlq", "post", {"question": q})
         if isinstance(resp, dict) and "answer" in resp:
             st.success(resp["answer"])
         else:
             st.warning("I couldn't generate an answer for that.")
+
 
 # -------- SQL Explorer --------
 with tab_sql:
@@ -451,4 +483,3 @@ with tab_sql:
         except Exception as e:
             st.error(f"Error running query: {e}")
 
-st.caption("Connect Tableau to data/results/*.csv for an exec deck. SQL warehouse: data/warehouse.db")
