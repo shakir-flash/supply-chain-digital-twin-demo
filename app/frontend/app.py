@@ -5,6 +5,21 @@ import plotly.express as px
 import streamlit as st
 from pathlib import Path
 from st_aggrid import AgGrid, GridOptionsBuilder
+from components.hd_header import render_header
+
+render_header(
+    logo_path="assets/hd_favicon.png",  # update if your path is different
+    company="The Home Depot",
+    interview_title="Supply Chain Digital Twin, Interview Demo",
+    candidate_name="Shakir Ahmed",
+    subtitle="Scenario planning, cost tradeoffs, and service risk",
+    location="United States",
+    contact="datashakir0585@email.com",
+    tags=["Lean KPIs", "Total cost", "Transport cost", "Unmet units"],
+    show_divider=True,
+    sticky=False,          # set True if you want the header to stay on top while scrolling
+    hide_streamlit_chrome=True
+)
 
 # ---------- Config ----------
 BACKEND = "http://localhost:8000"
