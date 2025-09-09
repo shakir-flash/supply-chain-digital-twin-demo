@@ -400,32 +400,30 @@ with tab_map:
 with tab_nlq:
     st.subheader("Ask the Network")
 
-    # Suggested questions (simple static box)
+    # ✅ Suggested questions that match backend intents
     st.markdown(
-    """
-    <div style="
-        background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 14px;
-        padding: 14px 18px;
-        margin-bottom: 14px;
-        color: #f5f5f5;
-        font-size: 0.95rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.35);">
-        <span style="font-weight:600; font-size:1rem; color:#FFA559;"> Suggested questions you can ask:</span>
-        <ul style="margin-top:8px; line-height:1.6;">
-            <li>What is the total cost?</li>
-            <li>What is the transport cost?</li>
-            <li>How many unmet units?</li>
-            <li>Show unmet units by region</li>
-            <li>Top DCs by utilization</li>
-            <li>Bottom DCs by utilization</li>
-            <li>Which lanes are the slowest?</li>
-        </ul>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+        """
+        <div style="
+            background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 14px;
+            color: #f5f5f5;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.35);">
+            <span style="font-weight:600; font-size:1rem; color:#FFA559;">💡 Suggested questions you can ask:</span>
+            <ul style="margin-top:8px; line-height:1.6;">
+                <li>What is the total cost?</li>
+                <li>What is the transport cost?</li>
+                <li>How many unmet units?</li>
+                <li>Which DC has the highest utilization?</li>
+                <li>Which DC has the lowest utilization?</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     # Input box
     q = st.text_input("Question", "Which DC has the highest utilization?")
